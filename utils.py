@@ -3,7 +3,7 @@ import math
 import numpy as np
 from projMapToFrame import pctransform
 
-######## Written BY : SWAPNIL DAS (As part of 16-833, Spring 2020, CMU) (Translation of Matlab code from HW4)
+######## Written BY : SWAPNIL DAS (As part of 16-833, Spring 2020, CMU) (Adapted from Matlab code from HW4)
 
 focalLength = 525.0
 centerX = 319.5

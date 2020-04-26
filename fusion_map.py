@@ -243,10 +243,10 @@ if __name__ == '__main__':
               write_ply(out_filename,points)
         elif frame==0:
             fusion_map = init_fusion_map(input_points)
-            print("Frame: ",frame,". Total Number of Points in Map : ",len(fusion_map))
+            print("Frame: ",frame,"/",len(list),". Total Number of Points in Map : ",len(fusion_map))
         else:
             fusion_map = fuse(fusion_map, input_points, pose, cam_param, sigma, ds_ratio, frame)
-            print("Frame: ",frame,". Total Number of Points in Map : ",len(fusion_map))
+            print("Frame: ",frame,"/",len(list),". Total Number of Points in Map : ",len(fusion_map))
     all_points = []
     for i in range(len(fusion_map)):
         p = fusion_map.points[i,:]

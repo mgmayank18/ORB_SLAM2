@@ -1,6 +1,8 @@
 import numpy as np
 from projMapToFrame import Pointcloud
 
+######## Written BY : MAYANK GUPTA (As part of 16-833, Spring 2020, CMU) (Adapted from Matlab code from HW4)
+
 def avgProjMapWithInputData(proj_map, input_data, h, w, is_use):
     input_points = input_data.points
     input_colors = input_data.colors
@@ -11,6 +13,8 @@ def avgProjMapWithInputData(proj_map, input_data, h, w, is_use):
     proj_normals = proj_map.normals
     proj_ccounts = proj_map.ccounts
 
+    input_points_valid_mask = input_data.valid_mask
+    is_use = np.logical_and(is_use,input_points_valid_mask)
     is_use_3 = np.transpose(np.tile(is_use,(3,1,1)),(1,2,0))
     
     proj_points_ = np.reshape(proj_points[is_use_3],(-1,3))
@@ -26,9 +30,11 @@ def avgProjMapWithInputData(proj_map, input_data, h, w, is_use):
     proj_ccounts[is_use] = np.squeeze(proj_ccounts_ + alpha_)
     
     updated_map = Pointcloud(proj_points, proj_colors, proj_normals, proj_ccounts)
+    updated_map.set_valid_mask(is_use)
     return updated_map
 
 def updateFusionMapWithProjMap(fusion_map, updated_map, h, w, proj_flag):
+    input_valid_mask = updated_map.valid_mask
     old_flag = np.logical_not(proj_flag)
     
     old_flag_3 = np.transpose(np.tile(old_flag,(3,1)))
@@ -37,10 +43,10 @@ def updateFusionMapWithProjMap(fusion_map, updated_map, h, w, proj_flag):
     old_normals = np.reshape(fusion_map.normals[old_flag_3], (-1,3))
     old_ccounts = fusion_map.ccounts[old_flag]
     
-    map_points = np.vstack((old_points, np.reshape(updated_map.points, (-1,3))))
-    map_colors = np.vstack((old_colors, np.reshape(updated_map.colors, (-1,3))))
-    map_normals = np.vstack((old_normals, np.reshape(updated_map.normals, (-1,3))))
-    map_ccounts = np.concatenate((old_ccounts, updated_map.ccounts.flatten()))
+    map_points = np.vstack((old_points, np.reshape(updated_map.points[input_valid_mask,:], (-1,3))))
+    map_colors = np.vstack((old_colors, np.reshape(updated_map.colors[input_valid_mask,:], (-1,3))))
+    map_normals = np.vstack((old_normals, np.reshape(updated_map.normals[input_valid_mask,:], (-1,3))))
+    map_ccounts = np.concatenate((old_ccounts, updated_map.ccounts[input_valid_mask].flatten()))
     
     fusion_map = Pointcloud(map_points, map_colors, map_normals, map_ccounts)
     

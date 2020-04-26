@@ -4,7 +4,7 @@ from projMapToFrame import proj, Pointcloud
 from utils import *
 from update_map import *
 
-######## Written BY : MAYANK GUPTA (As part of 16-833, Spring 2020, CMU) (Translation of Matlab code from HW4)
+######## Written BY : MAYANK GUPTA (As part of 16-833, Spring 2020, CMU) (Adapted from Matlab code from HW4)
 
 def fuse(fusion_map, input_data, pose, cam_param, sigma, ds_ratio, t):
     #Parameters (square of point distance threshold) ====

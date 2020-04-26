@@ -3,6 +3,8 @@ import open3d as o3d
 
 import argparse
 
+######## Written BY : MAYANK GUPTA (As part of 16-833, Spring 2020, CMU) (Adapted from Matlab code from HW4)
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--path", type=str, help="Input file path")
 args=parser.parse_args()

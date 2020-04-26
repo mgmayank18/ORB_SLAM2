@@ -1,10 +1,9 @@
 #!/usr/bin/python
 import math
 import numpy as np
-import numpy.ma as ma
 from projMapToFrame import pctransform
 
-### By SWAPNIL DAS
+######## Written BY : SWAPNIL DAS (As part of 16-833, Spring 2020, CMU) (Translation of Matlab code from HW4)
 
 focalLength = 525.0
 centerX = 319.5
@@ -26,12 +25,6 @@ def isFirst(proj_points, h, w):
 def isUsableInputPoints(is_s, is_c, is_f):
 	return np.logical_or(is_f, np.logical_and(is_c, is_s))
 
-def avgProjMapWithInputData(proj_map, trans_points, trans_normals, alpha, h, w, is_use):
-	input_mask_data = ma.array(input_data, is_use)
-	result_data = (ccounts * proj_data + alpha * input_mask_data)/(ccounts + alpha)
-	result_normals = (ccounts * proj_normals + alpha * input_normals)/(ccounts + alpha)
-	ccounts = ccounts + alpha
-	return result_data, result_normals
 
 
 

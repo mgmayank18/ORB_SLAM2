@@ -2,6 +2,9 @@ import math
 import numpy as np
 from projMapToFrame import proj, Pointcloud
 from utils import *
+from update_map import *
+
+######## Written BY : MAYANK GUPTA (As part of 16-833, Spring 2020, CMU) (Translation of Matlab code from HW4)
 
 def fuse(fusion_map, input_data, pose, cam_param, sigma, ds_ratio, t):
     #Parameters (square of point distance threshold) ====
@@ -20,11 +23,8 @@ def fuse(fusion_map, input_data, pose, cam_param, sigma, ds_ratio, t):
     is_similar = isInputSimilarToProjNormals(trans_normals, proj_normals, dot_th)
     is_first = isFirst(proj_points, input_data.h, input_data.w)
     is_use = isUsableInputPoints(is_close, is_similar, is_first)
-    alpha = input_data.ccounts
+
+    updated_map = avgProjMapWithInputData(proj_map, input_data, input_data.h, input_data.w, is_use)
     
-    updated_map = avgProjMapWithInputData(proj_map, trans_points, trans_normals, alpha, h, w, is_use)
-    
-    #next_ref_data = getNextRefData(updated_map, ds_ratio)
-    
-    fusion_map = updateFusionMapWithProjMap(fusion_map, updated_map, h, w, proj_flag)
+    fusion_map = updateFusionMapWithProjMap(fusion_map, updated_map, input_data.h, input_data.w, proj_flag)
     return fusion_map

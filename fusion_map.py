@@ -217,8 +217,6 @@ if __name__ == '__main__':
     else:
       traj = read_trajectory(args.trajectory_file)
     
-    all_points = []
-    
     fusion_map = None
 
     list  = range(0,len(matches_rgb_traj),int(args.nth))
@@ -245,8 +243,16 @@ if __name__ == '__main__':
               write_ply(out_filename,points)
         elif frame==0:
             fusion_map = init_fusion_map(input_points)
+            print("Frame: ",frame,". Total Number of Points in Map : ",len(fusion_map))
         else:
             fusion_map = fuse(fusion_map, input_points, pose, cam_param, sigma, ds_ratio, frame)
-            
+            print("Frame: ",frame,". Total Number of Points in Map : ",len(fusion_map))
+    all_points = []
+    for i in range(len(fusion_map)):
+        p = fusion_map.points[i,:]
+        c = fusion_map.colors[i,:]
+        n = fusion_map.normals[i,:]
+        all_points.append("%f %f %f %d %d %d 0 %f %f %f\n"%(p[0],p[1],p[2],c[0],c[1],c[2], n[0], n[1], n[2]))
+
     if not args.individual:
       write_ply(args.output_file,all_points)

@@ -1,5 +1,7 @@
 import numpy as np
 
+######## Written BY : MAYANK GUPTA (As part of 16-833, Spring 2020, CMU) (Translation of Matlab code from HW4)
+
 class Pointcloud:
     def __init__(self, points, colors, normals, ccounts=None, sigma=0.6):
         self.points = points

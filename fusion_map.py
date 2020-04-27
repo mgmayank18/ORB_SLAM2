@@ -163,10 +163,9 @@ def generate_pointcloud(rgb_file,depth_file,transform,downsample,pcd=False,fused
                 colors[u,v,:] = [color[0],color[1],color[2]]
                 normals[u,v,:] = [normal_transf[0], normal_transf[1], normal_transf[2]]
                 ccounts[u,v] = np.exp(-1*np.sum(np.square(np.array(vec_org[0:3])))/(2*(sigma**2)))
-    input_points = Pointcloud(np.array(points),np.array(colors),np.array(normals))
+    input_points = Pointcloud(np.array(points),np.array(colors),np.array(normals), np.array(ccounts))
     input_points.set_h_w(rgb.size[0],rgb.size[1]) #Need to verify dims
     input_points.set_valid_mask(valid_mask)
-    
     return input_points
 
 def init_fusion_map(input_points):
@@ -220,6 +219,8 @@ if __name__ == '__main__':
     fusion_map = None
 
     list  = range(0,len(matches_rgb_traj),int(args.nth))
+    total_points_seen = 0
+
     for frame,i in enumerate(list):
         rgb_stamp,traj_stamp = matches_rgb_traj[i]
 
@@ -243,16 +244,22 @@ if __name__ == '__main__':
               write_ply(out_filename,points)
         elif frame==0:
             fusion_map = init_fusion_map(input_points)
-            print("Frame: ",frame,"/",len(list),". Total Number of Points in Map : ",len(fusion_map))
+            total_points_seen += len(fusion_map)
+            flen = len(fusion_map)
+            sys.stdout.write('\rFrame: %d/%d. Points in Fusion Map : %d. Compression Ratio : %0.02f' %(frame,len(list),flen,100*(float(flen)/total_points_seen)))
+            sys.stdout.flush()
         else:
             fusion_map = fuse(fusion_map, input_points, pose, cam_param, sigma, ds_ratio, frame)
-            print("Frame: ",frame,"/",len(list),". Total Number of Points in Map : ",len(fusion_map))
+            total_points_seen += np.sum(input_points.valid_mask)
+            flen = len(fusion_map)
+            sys.stdout.write('\rFrame: %d/%d. Points in Fusion Map : %d. Compression Ratio : %0.02f' %(frame,len(list),flen,100*(float(flen)/total_points_seen)))
+            sys.stdout.flush()
     all_points = []
     for i in range(len(fusion_map)):
         p = fusion_map.points[i,:]
         c = fusion_map.colors[i,:]
         n = fusion_map.normals[i,:]
         all_points.append("%f %f %f %d %d %d 0 %f %f %f\n"%(p[0],p[1],p[2],c[0],c[1],c[2], n[0], n[1], n[2]))
-
+    
     if not args.individual:
       write_ply(args.output_file,all_points)

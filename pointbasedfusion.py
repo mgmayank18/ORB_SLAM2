@@ -8,7 +8,7 @@ from update_map import *
 
 def fuse(fusion_map, input_data, pose, cam_param, sigma, ds_ratio, t):
     #Parameters (square of point distance threshold) ====
-    dist_th = 0.05 #5cm
+    dist_th = 0.05 #50cm?
     dist2_th = dist_th**2
     dot_th = math.cos(20*math.pi/180)
     
@@ -18,12 +18,12 @@ def fuse(fusion_map, input_data, pose, cam_param, sigma, ds_ratio, t):
 
     trans_points = input_data.points
     trans_normals = input_data.normals
-
     is_close = isInputCloseToProjPoints(trans_points, proj_points, dist2_th)
     is_similar = isInputSimilarToProjNormals(trans_normals, proj_normals, dot_th)
     is_first = isFirst(proj_points, input_data.h, input_data.w)
-    is_use = isUsableInputPoints(is_close, is_similar, is_first)
-
+    input_valid_mask = input_data.valid_mask
+    is_use = isUsableInputPoints(is_close, is_similar, is_first, input_valid_mask)
+    
     updated_map = avgProjMapWithInputData(proj_map, input_data, input_data.h, input_data.w, is_use)
     
     fusion_map = updateFusionMapWithProjMap(fusion_map, updated_map, input_data.h, input_data.w, proj_flag)

@@ -3,7 +3,7 @@ import numpy as np
 ######## Written BY : MAYANK GUPTA (As part of 16-833, Spring 2020, CMU) (Adapted from Matlab code from HW4)
 
 class Pointcloud:
-    def __init__(self, points, colors, normals, ccounts=None, sigma=0.6):
+    def __init__(self, points, colors, normals, ccounts, sigma=0.6):
         self.points = points
         self.colors = colors
         self.normals = normals
@@ -11,16 +11,10 @@ class Pointcloud:
         self.h = None
         self.w = None
         self.num_points = len(points)
-        if ccounts is None:
-            flat_points = np.reshape(points,(-1,3))
-            ccounts = np.exp(-1*np.divide(np.sum(np.square(flat_points),1),2*(sigma**2)))
-            ccounts = np.reshape(ccounts,(points.shape[0],points.shape[1]))
-            self.ccounts = ccounts
-        else:
-            self.ccounts = ccounts
+        self.ccounts = ccounts
 
     def __len__(self):
-        return self.num_points
+        return int(self.points.size/3)
 
     def set_h_w(self,h,w):
         self.h = h
@@ -47,7 +41,6 @@ def proj(fusion_map, h, w, pose, cam_param):
 
     pose_inv = np.hstack((R_inv,t_inv))
     pose_inv = np.vstack((pose_inv,np.array([0,0,0,1])))
-    
     fusion_map_cam_frame_points = pctransform(fusion_map.points, R_inv, t_inv)
     
     proj_flag = (fusion_map_cam_frame_points[:,2] > 0)
@@ -66,7 +59,7 @@ def proj(fusion_map, h, w, pose, cam_param):
     
     proj_flag = np.logical_and(proj_flag, in_frame_mask)
     valid_mask = np.transpose(np.tile(proj_flag,(3,1)))
-    valid_points = np.round(valid_points)
+    valid_points = np.floor(valid_points)
 
     proj_points_ = np.reshape(fusion_map.points[valid_mask],(-1,3))
     proj_colors_ = np.reshape(fusion_map.colors[valid_mask],(-1,3))
@@ -79,18 +72,15 @@ def proj(fusion_map, h, w, pose, cam_param):
     proj_ccounts = np.zeros((h*w))
     
     loc = np.reshape(valid_points[valid_mask],(-1,3))
-    ind = (1+loc[:,1]*h+loc[:,2]).astype(np.uint8)
-    
+    ind = ((loc[:,0])+(loc[:,1])*h).astype(np.uint64)
     proj_points[ind, :] = proj_points_
     proj_colors[ind, :] = proj_colors_
     proj_normals[ind, :] = proj_normals_
     proj_ccounts[ind] = proj_ccounts_
-    
     proj_points = np.reshape(proj_points, [h, w, 3])
     proj_colors = np.reshape(proj_colors, [h, w, 3])
     proj_normals = np.reshape(proj_normals, [h, w, 3])
     proj_ccounts = np.reshape(proj_ccounts, [h, w])
-    
     proj_map = Pointcloud(proj_points, proj_colors, proj_normals, proj_ccounts)
     
     return proj_map, proj_flag

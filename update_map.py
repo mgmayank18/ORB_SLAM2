@@ -8,13 +8,12 @@ def avgProjMapWithInputData(proj_map, input_data, h, w, is_use):
     input_colors = input_data.colors
     input_normals = input_data.normals
     alpha = input_data.ccounts
+
     proj_points = proj_map.points
     proj_colors = proj_map.colors
     proj_normals = proj_map.normals
     proj_ccounts = proj_map.ccounts
 
-    input_points_valid_mask = input_data.valid_mask
-    is_use = np.logical_and(is_use,input_points_valid_mask)
     is_use_3 = np.transpose(np.tile(is_use,(3,1,1)),(1,2,0))
     
     proj_points_ = np.reshape(proj_points[is_use_3],(-1,3))
@@ -30,7 +29,8 @@ def avgProjMapWithInputData(proj_map, input_data, h, w, is_use):
     proj_ccounts[is_use] = np.squeeze(proj_ccounts_ + alpha_)
     
     updated_map = Pointcloud(proj_points, proj_colors, proj_normals, proj_ccounts)
-    updated_map.set_valid_mask(is_use)
+    non_zero_mask = (np.sum(proj_points == 0,2) < 3)
+    updated_map.set_valid_mask(non_zero_mask)
     return updated_map
 
 def updateFusionMapWithProjMap(fusion_map, updated_map, h, w, proj_flag):
